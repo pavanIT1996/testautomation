@@ -53,6 +53,21 @@ public class HomePage {
         return  new EntryAdPage(driver);
     }
 
+    public ContextMenuPage clickContextMenu(){
+        clickLink("Context Menu");
+        return  new ContextMenuPage(driver);
+    }
+
+    public WYSIWYGPage clickWYSIWYG(){
+        clickLink("WYSIWYG Editor");
+        return new WYSIWYGPage(driver);
+    }
+
+    public FramePage clickFrames(){
+        clickLink("Frames");
+        return new FramePage(driver);
+    }
+
     private void clickLink(String linkText){
         driver.findElement(By.linkText(linkText)).click();
     }
