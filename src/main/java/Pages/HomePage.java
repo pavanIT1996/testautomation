@@ -3,6 +3,8 @@ package Pages;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
+import java.util.concurrent.TimeUnit;
+
 public class HomePage {
     private WebDriver driver;
 
@@ -50,6 +52,7 @@ public class HomePage {
 
     public EntryAdPage clickEntryAd(){
         clickLink("Entry Ad");
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         return  new EntryAdPage(driver);
     }
 
@@ -66,6 +69,11 @@ public class HomePage {
     public FramePage clickFrames(){
         clickLink("Frames");
         return new FramePage(driver);
+    }
+
+    public DynamicLoadingPage clickDynamicLoading(){
+        clickLink("Dynamic Loading");
+        return new DynamicLoadingPage(driver);
     }
 
     private void clickLink(String linkText){
