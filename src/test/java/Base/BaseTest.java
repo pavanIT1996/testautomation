@@ -1,12 +1,14 @@
 package Base;
 
 import Pages.HomePage;
+import Utils.EventReporter;
 import Utils.WindowManager;
 import com.google.common.io.Files;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
 
@@ -18,15 +20,17 @@ import java.util.Date;
 
 public class BaseTest {
 
-    private WebDriver driver;
+//    private WebDriver driver;
+    private EventFiringWebDriver driver;
     protected HomePage homepage;
 
     @BeforeClass
     public void setup() {
         System.setProperty("webdriver.chrome.driver","resources/chromedriver.exe");
-        driver = new ChromeDriver();
+        driver = new EventFiringWebDriver(new ChromeDriver());
         //driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 //        driver.manage().timeouts().pageLoadTimeout()
+        driver.register(new EventReporter());
         goHome();
 
         homepage=new HomePage(driver);
