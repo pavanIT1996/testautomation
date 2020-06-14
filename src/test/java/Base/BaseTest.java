@@ -2,13 +2,19 @@ package Base;
 
 import Pages.HomePage;
 import Utils.WindowManager;
+import com.google.common.io.Files;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
+import org.testng.ITestResult;
+import org.testng.annotations.*;
 
-import java.util.concurrent.TimeUnit;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 
 public class BaseTest {
 
@@ -56,6 +62,29 @@ public class BaseTest {
 //        BaseTest Test= new BaseTest();
 //        Test.setup();
 //    }
+
+    @AfterMethod
+    public void takesScreenshot(ITestResult result){
+        String DateTime = new SimpleDateFormat("yyyy-MM-dd-HH.mm").format(new Date());
+        if(ITestResult.FAILURE==result.getStatus()){
+            var camera = (TakesScreenshot)driver;
+            File screenshot = camera.getScreenshotAs(OutputType.FILE);
+            try {
+                Files.move(screenshot,new File("resources/screenshots/Failures/"+DateTime+"_"+result.getName()+"_Fail"+".png"));
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }else{
+            var camera = (TakesScreenshot)driver;
+            File screenshot = camera.getScreenshotAs(OutputType.FILE);
+            try {
+                Files.move(screenshot,new File("resources/screenshots/Success/"+DateTime+"_"+result.getName()+"_Pass"+".png"));
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+
+    }
 
     public WindowManager getWindowManager(){
         return new WindowManager(driver);
