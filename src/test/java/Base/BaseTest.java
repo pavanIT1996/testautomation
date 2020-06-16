@@ -4,12 +4,13 @@ import Pages.HomePage;
 import Utils.EventReporter;
 import Utils.WindowManager;
 import com.google.common.io.Files;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
@@ -22,37 +23,60 @@ import java.util.Date;
 
 public class BaseTest {
 
-//    private WebDriver driver;
-    private EventFiringWebDriver driver;
+    private WebDriver driver;
+    private Capabilities caps;
+//    private EventFiringWebDriver driver;
     protected HomePage homepage;
+    private String path;
 
-    @BeforeClass
+    @BeforeClass()
     public void setup() {
+//        ChromeBrowser();
+//        FirefoxBrowser();
+//        EdgeBrowser();
+        IEBrowser();
+
+    }
+
+    public void ManagerBrowser(){
+        driver.manage().window().maximize();;
+        driver.manage().window().fullscreen();
+        driver.manage().window().setSize(new Dimension(411,731));
+    }
+
+    public void ChromeBrowser(){
         System.setProperty("webdriver.chrome.driver","resources/chromedriver.exe");
-        driver = new EventFiringWebDriver(new ChromeDriver(getChromeOptions()));
-        //driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-//        driver.manage().timeouts().pageLoadTimeout()
-        driver.register(new EventReporter());
+        driver = new ChromeDriver();
+//        driver = new EventFiringWebDriver(new ChromeDriver(getChromeOptions()));
+        caps= ((RemoteWebDriver) driver).getCapabilities();
+//        driver.register(new EventReporter());
         goHome();
-        setCookies();
+        //setCookies();
+    }
 
-//        homepage=new HomePage(driver);
 
-        //driver.manage().window().maximize();;
-        //driver.manage().window().fullscreen();
-        //driver.manage().window().setSize(new Dimension(411,731));
+    public void FirefoxBrowser(){
+        System.setProperty("webdriver.gecko.driver","resources/geckodriver.exe");
+        driver = new FirefoxDriver();
+        caps= ((RemoteWebDriver) driver).getCapabilities();
+        goHome();
+//        setCookies();
+    }
 
-//		WebElement Inputslink= driver.findElement(By.linkText("Shifting Content"));
-//		Inputslink.click();
-//
-//		WebElement Inputslink2= driver.findElement(By.linkText("Example 1: Menu Element"));
-//		Inputslink2.click();
-//
-//		List<WebElement> links= driver.findElements(By.tagName("li"));
-//		System.out.println(links.size());
-//
-//		System.out.println(driver.getTitle());
+    public void IEBrowser(){
+        System.setProperty("webdriver.ie.driver","resources/IEDriverServer.exe");
+        driver = new InternetExplorerDriver();
+        caps= ((RemoteWebDriver) driver).getCapabilities();
+        goHome();
+//        setCookies();
+    }
 
+    public void EdgeBrowser(){
+        System.setProperty("webdriver.edge.driver","resources/msedgedriver.exe");
+        driver = new EdgeDriver();
+        caps= ((RemoteWebDriver) driver).getCapabilities();
+        goHome();
+//        setCookies();
     }
 
     @BeforeMethod
@@ -61,24 +85,25 @@ public class BaseTest {
         homepage=new HomePage(driver);
     }
 
-    @AfterClass
-    public void teardown(){
-        driver.quit();
-    }
-
-//    public static void main(String args[]) {
-//        BaseTest Test= new BaseTest();
-//        Test.setup();
-//    }
 
     @AfterMethod
     public void takesScreenshot(ITestResult result){
         String DateTime = new SimpleDateFormat("yyyy-MM-dd-HH.mm").format(new Date());
+        if(caps.getBrowserName().equals("chrome")){
+            path="resources/screenshots/Chrome";
+        } else if (caps.getBrowserName().equals("firefox")){
+            path="resources/screenshots/Firefox";
+        } else if (caps.getBrowserName().equals("msedge")){
+            path="resources/screenshots/Edge";
+        } else{
+            path="resources/screenshots/IE";
+        }
+
         if(ITestResult.FAILURE==result.getStatus()){
             var camera = (TakesScreenshot)driver;
             File screenshot = camera.getScreenshotAs(OutputType.FILE);
             try {
-                Files.move(screenshot,new File("resources/screenshots/Failures/"+DateTime+"_"+result.getName()+"_Fail"+".png"));
+                Files.move(screenshot,new File(path+"/FAIL",DateTime+"_"+result.getName()+"_"+caps.getBrowserName()+"_Fail"+".png"));
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -86,12 +111,17 @@ public class BaseTest {
             var camera = (TakesScreenshot)driver;
             File screenshot = camera.getScreenshotAs(OutputType.FILE);
             try {
-                Files.move(screenshot,new File("resources/screenshots/Success/"+DateTime+"_"+result.getName()+"_Pass"+".png"));
+                Files.move(screenshot,new File(path+"/SUCCESS",DateTime+"_"+result.getName()+"_"+caps.getBrowserName()+"_Pass"+".png"));
             }catch (IOException e){
                 e.printStackTrace();
             }
         }
 
+    }
+
+    @AfterMethod
+    public void teardown(){
+        driver.quit();
     }
 
     public WindowManager getWindowManager(){
@@ -111,4 +141,5 @@ public class BaseTest {
                 .build();
         driver.manage().addCookie(cookie);
     }
+
 }
